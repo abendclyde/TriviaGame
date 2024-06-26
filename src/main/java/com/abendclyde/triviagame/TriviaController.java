@@ -98,6 +98,7 @@ public class TriviaController {
         this.stage = stage;
     }
 
+    // Prepare all the ComboBoxes with the Data from the Trivia-Class
     public void setTrivia(Trivia trivia) {
         this.trivia = trivia;
 
@@ -114,6 +115,7 @@ public class TriviaController {
         countBox.getItems().addAll(trivia.getQuestionCount());
         countBox.setPromptText(countDefault);
 
+        // Set the Default Value for the ComboBoxes
         topicBox.setButtonCell(new ListCell<>() {
             @Override
             protected void updateItem(Category item, boolean empty) {
@@ -153,12 +155,14 @@ public class TriviaController {
         fillCatPickBox();
     }
 
+    // Fill the Category Picker Box in the Statistics Tab
     public void fillCatPickBox() {
         categoryStatsPickerBox.getItems().addAll(trivia.getCategories());
         categoryStatsPickerBox.setItems(categoryStatsPickerBox.getItems().sorted());
         categoryStatsPickerBox.setPromptText(topicDefault);
     }
 
+    // Function handling the switch and opening of the Switch Player Popup
     @FXML
     protected void openSwitchPlayer() throws IOException {
         Stage popupStage = new Stage();
@@ -178,6 +182,11 @@ public class TriviaController {
         popupStage.show();
     }
 
+    /* 
+    Function handling if the player selected a question count. 
+    An error will be displayed if not.
+    Also switches the view to the gametab and prevents misclicks back to the starttab
+    */ 
     public void startGame() {
         if(countBox.getValue() == null) {
             errorDisplay.setVisible(true);
@@ -206,8 +215,11 @@ public class TriviaController {
         startTab.setDisable(true);
     }
 
+
     private void loadQuestion() {
         Question question = trivia.nextQuestion();
+
+        // If there are no more questions, save the data and switch back to the start tab
         if (question == null) {
             trivia.saveData();
             startTab.setDisable(false);
@@ -216,22 +228,24 @@ public class TriviaController {
             return;
         }
 
-        promptDisplay.setText(question.getText());
+        promptDisplay.setText(question.getText()); // Set the Question Text on the Prompt Display
 
         String correctAnswer = question.getCorrectAnswer();
         List<String> incorrectAnswers = question.getIncorrectAnswers();
 
         correctButton = ThreadLocalRandom.current().nextInt(0, incorrectAnswers.size() + 1);
 
+        // Add the correct answer to the list of answers and shuffle them
         List<String> answers = new ArrayList<>(incorrectAnswers);
         Collections.shuffle(answers);
         answers.add(correctButton, correctAnswer);
-
+        
+        // Set the answers on the buttons
         answer1.setText(answers.get(0));
         answer1.setTooltip(new Tooltip(answers.get(0)));
         answer2.setText(answers.get(1));
         answer2.setTooltip(new Tooltip(answers.get(1)));
-        if (answers.size() > 2) {
+        if (answers.size() > 2) { // If there are more than 2 answers, set them
             answer3.setVisible(true);
             answer3.setText(answers.get(2));
             answer3.setTooltip(new Tooltip(answers.get(2)));
@@ -243,7 +257,7 @@ public class TriviaController {
             answer4.setVisible(false);
         }
     }
-
+    // Functions for resetting each ComboBox
     public void resetTopic(){
         topicBox.getSelectionModel().clearSelection();
     }
@@ -257,6 +271,7 @@ public class TriviaController {
         answerTypeBox.getSelectionModel().clearSelection();
     }
 
+    // Functions for clicking an answer button with a check if it's the right one
     public void answerClick1(){
         if(correctButton == 0) {
             increaseScore();
@@ -285,13 +300,18 @@ public class TriviaController {
         loadQuestion();
     }
 
+    // Function for increasing the score display
     private void increaseScore() {
         score.setText(String.format("Score: %d", trivia.increaseScore()));
     }
 
+    // Function for preparing the TableView when opening the stats view tab
+    /**
+     * Opens the stats view and populates the stats table with data.
+     * This method binds the data to the stats table and starts a service to load the stats asynchronously.
+     * The stats table will display the player name, total score, total rounds, and category right percentage for each player.
+     */
     public void onOpenStatsView() {
-        System.out.println("Test");
-
         userColumn.setCellValueFactory(cdf -> new SimpleStringProperty((String) cdf.getValue().get(0)));
         totalScoreColumn.setCellValueFactory(cdf -> new SimpleIntegerProperty((Integer) cdf.getValue().get(1)).asObject());
         totalRoundsColumn.setCellValueFactory(cdf -> new SimpleIntegerProperty((Integer) cdf.getValue().get(2)).asObject());
@@ -313,7 +333,7 @@ public class TriviaController {
                 };
             }
         };
-
+        // Bind the data to the stats database
         statsTable.itemsProperty().bind(service.valueProperty());
         service.start();
     }

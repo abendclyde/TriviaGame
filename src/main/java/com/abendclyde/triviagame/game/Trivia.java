@@ -18,6 +18,10 @@ import org.json.JSONObject;
 import com.abendclyde.triviagame.database.Database;
 import com.abendclyde.triviagame.database.Stats;
 
+/*
+ * The Trivia class is responsible for managing the game's trivia questions and player data.
+ * It provides methods for loading trivia questions, saving player data, and switching players. 
+ */
 public class Trivia {
     private final Database db;
 
@@ -31,12 +35,14 @@ public class Trivia {
         this.player = player;
     }
 
+    // Save the player's data to the database and reset the score and question count
     public void saveData() {
         db.saveData(player, score, questionCount);
         score = 0;
         questionCount = 0;
     }
 
+    // Load the player's statistics from the database
     public List<Stats> loadStats() {
         return db.loadStats();
     }
@@ -46,15 +52,16 @@ public class Trivia {
         return score;
     }
 
+
     public Question nextQuestion() {
         if (!questions.isEmpty()) {
             questionCount++;
         }
-        return questions.poll();
+        return questions.poll(); // Get the next question
     }
 
+    // Switch the player and reset the score and question count
     public void switchPlayer(String player) {
-        // store stuff and reset
         this.player = player;
         score = 0;
         questionCount = 0;
@@ -64,6 +71,7 @@ public class Trivia {
         return player;
     }
 
+    // Get the OpenTDBs categories through a HTTP request
     public List<Category> getCategories() {
         List<Category> categories = new ArrayList<>();
 
@@ -83,7 +91,7 @@ public class Trivia {
 
         return categories;
     }
-
+    // Set the combo boxes for the difficulty, question count and answer type
     public List<String> getDifficulties() {
         List<String> difficulties = new ArrayList<>();
 
@@ -116,12 +124,13 @@ public class Trivia {
         return answerTypes;
     }
 
+    // Request questions from the OpenTDB API
     public boolean loadQuestions(int questionCount, Integer categoryID, String difficulty, String answerType) {
         Queue<Question> questions = new LinkedList<>();
         StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append("https://opentdb.com/api.php")
                 .append("?amount=").append(questionCount);
-
+        // Append optional parameters
         if(categoryID != null) {
             urlBuilder.append("&category=").append(categoryID);
         }
@@ -132,6 +141,7 @@ public class Trivia {
             urlBuilder.append("&type=").append(answerType);
         }
 
+        // Send the HTTP request and parse the JSON response
         try (HttpClient client = HttpClient.newHttpClient()){
             HttpRequest request = HttpRequest.newBuilder(URI.create(urlBuilder.toString())).GET().build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -166,6 +176,7 @@ public class Trivia {
         return false;
     }
 
+    // Decode the HTML encoded strings to allow for special characters
     private String decodeString(String s) {
         return StringEscapeUtils.unescapeHtml4(URLDecoder.decode(s, StandardCharsets.UTF_8));
     }

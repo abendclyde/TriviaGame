@@ -1,14 +1,15 @@
 package com.abendclyde.triviagame;
 
+import java.io.IOException;
+
 import com.abendclyde.triviagame.database.Database;
 import com.abendclyde.triviagame.game.Trivia;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
-import java.io.IOException;
 
 // Main Class responsible for First Time Initializing the App
 
@@ -18,7 +19,7 @@ public class TriviaGame extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         trivia.getCategories();
-
+        
         FXMLLoader loader = new FXMLLoader(TriviaGame.class.getResource("triviagame.fxml"));
         Parent parent = loader.load();
 
